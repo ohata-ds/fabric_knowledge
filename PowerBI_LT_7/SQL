@@ -1,0 +1,36 @@
+-- 全てのデータを取得
+SELECT * FROM products;
+
+-- Create（データの挿入）
+INSERT INTO products (ID, Product_Name, Category, Price, Stock, Release_Date) VALUES
+(6, 'スマートフォン', 'Electronics', 70000, 80, '2023-11-25');
+
+-- Update（データの更新）
+-- 特定の商品（例：IDが4のヘッドホン）の価格を更新
+UPDATE products SET Price = 22222 WHERE ID = 4;
+
+-- Delete（データの削除）
+-- 特定の商品（例：IDが5のブレンダー）を削除
+DELETE FROM products WHERE ID = 5;
+
+-- MERGE (データのアップサート)
+-- IDが一致する場合は既存のレコードを更新し、一致しない場合は新しいレコードを挿入します。
+MERGE INTO products AS p
+USING temp_prod AS tp
+ON p.ID = tp.ID
+WHEN MATCHED THEN
+    UPDATE SET 
+        p.Product_Name = tp.Product_Name,
+        p.Category = tp.Category,
+        p.Price = tp.Price,
+        p.Stock = tp.Stock,
+        p.Release_Date = tp.Release_Date
+WHEN NOT MATCHED THEN
+    INSERT (ID, Product_Name, Category, Price, Stock, Release_Date)
+    VALUES (tp.ID, tp.Product_Name, tp.Category, tp.Price, tp.Stock, tp.Release_Date);
+    
+-----------------------
+-- CREATE TABLE (テーブルの作成)
+-- products テーブルの全てのデータを含む products_copy テーブルを作成
+CREATE TABLE products_copy AS
+SELECT * FROM products;
