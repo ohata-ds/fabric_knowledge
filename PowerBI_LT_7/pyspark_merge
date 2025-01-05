@@ -1,0 +1,16 @@
+from pyspark.sql.functions import coalesce, col
+
+# データフレームの読み込み
+products_df = spark.read.format('delta').table('trial_b_lh.products')
+temp_prod_df = spark.read.format('delta').table('trial_b_lh.temp_prod')
+
+# マージ処理
+columns = ['Product_Name', 'Category', 'Price', 'Stock', 'Release_Date']
+select_expr = [col('ID')] + [coalesce(col(f'tp.{col_name}'), col(f'p.{col_name}')).alias(col_name) for col_name in columns]
+merged_df = products_df.alias('p').join(temp_prod_df.alias('tp'), 'ID', 'outer').select(*select_expr)
+
+# 結果の表示
+display(merged_df)
+
+# 結果の保存（アップサート処理）
+merged_df.write.format('delta').mode('overwrite').option('overwriteSchema', 'true').saveAsTable('trial_b_lh.products')
